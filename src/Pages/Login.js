@@ -8,6 +8,7 @@ function Login() {
   });
 
   const [message, setMessage] = useState("");
+  const [userData, setUserData] = useState(null); // State to store additional user data
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -23,10 +24,19 @@ function Login() {
     axios
       .post("http://localhost/php-react-sql/login.php", sendData)
       .then((result) => {
-        if (result.data.status === "Invalid") {
-          setMessage("Incorrect password or username not found");
+        if (result.data.status === "UsernameNotFound") {
+          setMessage("Username not found!");
+          // Clear the user data when login is invalid
+          setUserData(null);
+        } else if (result.data.status === "IncorrectPassword") {
+          setMessage("Password is Incorrect!");
+          // Clear the user data when login is invalid
+          setUserData(null);
         } else if (result.data.status === "Valid") {
           setMessage("Hello " + result.data.username);
+
+          // Store additional data in state
+          setUserData(result.data.userData);
         }
       });
 
@@ -56,6 +66,15 @@ function Login() {
         </div>
       </form>
       {message && <div>{message}</div>}
+      {userData && (
+        <div>
+          {/* Render and use the additional user data here */}
+          <p>User Data:</p>
+          <p>usersdata.id: {userData.id}</p>
+          <p>usersdata.uid: {userData.uid}</p>
+          <p>usersdata.datainfo: {userData.datainfo}</p>
+        </div>
+      )}
     </div>
   );
 }

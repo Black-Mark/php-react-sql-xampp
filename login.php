@@ -20,23 +20,40 @@ if ($username && $password) {
   if (mysqli_num_rows($checkResult) > 0) {
     $row = mysqli_fetch_assoc($checkResult);
     $storedPassword = $row['password'];
+    $uid = $row['id']; // Get the user's ID
 
     // Verify the password
     if (($password == $storedPassword)) {
-      $response = array(
-        'status' => 'Valid',
-        'username' => $username
-      );
-      echo json_encode($response);
+      // Fetch data from the usersdata table where uid matches id
+      $userDataQuery = "SELECT * FROM usersdata WHERE uid = $uid";
+      $userDataResult = mysqli_query($con, $userDataQuery);
+
+      if (mysqli_num_rows($userDataResult) > 0) {
+        $userData = mysqli_fetch_assoc($userDataResult);
+
+        $response = array(
+          'status' => 'Valid',
+          'username' => $username,
+          'userData' => $userData
+        );
+        echo json_encode($response);
+      } else {
+        $response = array(
+          'status' => 'Valid',
+          'username' => $username,
+          'userData' => null
+        );
+        echo json_encode($response);
+      }
     } else {
       $response = array(
-        'status' => 'Invalid'
+        'status' => 'IncorrectPassword'
       );
       echo json_encode($response);
     }
   } else {
     $response = array(
-      'status' => 'Invalid'
+      'status' => 'UsernameNotFound'
     );
     echo json_encode($response);
   }

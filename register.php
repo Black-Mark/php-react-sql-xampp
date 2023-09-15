@@ -1,11 +1,4 @@
 <?php
-// header("Access-Control-Allow-Origin: *");
-// header("Access-Control-Allow-Headers: access");
-// header("Access-Control-Allow-Methods: POST");
-// header("Content-Type: application/json; charset=UTF-8");
-// header("Access-Control-Allow-Headers: Content-Type,
-// Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 header("Access-Control-Allow-Methods: POST");
@@ -19,28 +12,37 @@ $password = $data->password;
 $con = mysqli_connect("localhost", "root", "");
 mysqli_select_db($con, "react-server");
 
-if($username && $password){
-// $sql = "insert into users(
-//     username,
-//     password,
-// )values(
-//     '$username',
-//     '$password',
-// )";
-$sql = "INSERT INTO users ( username, password) VALUES ('$username', '$password')";
+// Check if the username already exists
+$checkQuery = "SELECT * FROM users WHERE username = '$username'";
+$checkResult = mysqli_query($con, $checkQuery);
 
-$result = mysqli_query($con, $sql);
-
-if($result){
+if (mysqli_num_rows($checkResult) > 0) {
     $response = array(
-        'status' => 'valid'
+        'status' => 'username_taken'
     );
     echo json_encode($response);
-}else{
-    $response = array(
-        'status' => 'invalid'
-    );
-    echo json_encode($response);
-}
+} else {
+    // Username is not taken, proceed with registration
+    if (!empty($username) && !empty($password)) {
+        $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
+        $result = mysqli_query($con, $sql);
+
+        if ($result) {
+            $response = array(
+                'status' => 'valid'
+            );
+            echo json_encode($response);
+        } else {
+            $response = array(
+                'status' => 'invalid'
+            );
+            echo json_encode($response);
+        }
+    } else {
+        $response = array(
+            'status' => 'invalid_empty_data'
+        );
+        echo json_encode($response);
+    }
 }
 ?>
