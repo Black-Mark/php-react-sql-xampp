@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function Login() {
@@ -6,6 +6,22 @@ function Login() {
     username: "",
     password: "",
   });
+
+  const [baseURL, setBaseURL] = useState("");
+
+  useEffect(() => {
+    // Fetch the public IP address of the host where your React app is running
+    axios
+      .get("https://api64.ipify.org?format=json")
+      .then((response) => {
+        const hostIP = response.data.ip;
+
+        // Use the fetched IP address in the Axios request
+        let serverIP = `http://${hostIP}/php-react-sql/login.php`;
+        setBaseURL(serverIP);
+      })
+      console.log(baseURL);
+    }, []);
 
   const [message, setMessage] = useState("");
   const [userData, setUserData] = useState(null); // State to store additional user data
